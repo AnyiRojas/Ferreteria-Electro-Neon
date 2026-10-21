@@ -49,7 +49,7 @@ export default function ProductCard({
 
       {/* Body */}
       <div className="flex flex-1 flex-col p-4">
-        <p className="text-xs font-medium uppercase tracking-wide text-orange-500">
+        <p className="text-xs font-medium uppercase tracking-wide text-sky-500">
           {product.category?.name ?? 'Sin categoría'}
         </p>
         <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-gray-800">
@@ -97,7 +97,7 @@ export default function ProductCard({
           </button>
           <button
             onClick={() => onEdit(product)}
-            className="rounded-lg border border-orange-200 p-1.5 text-orange-500 hover:bg-orange-50"
+            className="rounded-lg border border-sky-200 p-1.5 text-sky-500 hover:bg-sky-50"
           >
             <Edit2 className="h-4 w-4" />
           </button>

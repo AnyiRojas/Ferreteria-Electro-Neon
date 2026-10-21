@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-import type { CartItem, CheckoutData } from '@/types';
+import { useEffect, useRef, useState } from 'react';
+import type { CartItem, CheckoutData, AppSettings } from '@/types';
 import { formatCurrency, formatDateTime, paymentMethodLabel } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 interface InvoicePrintProps {
   items: CartItem[];
   checkoutData: CheckoutData;
-  saleId?: string;         // número / ID de la venta para referencia
+  saleId?: string;
   onClose: () => void;
 }
+
+const SETTINGS_ID = '00000000-0000-0000-0000-000000000001';
 
 export default function InvoicePrint({
   items,
@@ -18,6 +21,7 @@ export default function InvoicePrint({
   onClose,
 }: InvoicePrintProps) {
   const printRef = useRef<HTMLDivElement>(null);
+  const [settings, setSettings] = useState<AppSettings | null>(null);
 
   const subtotal       = items.reduce((s, i) => s + i.subtotal, 0);
   const discountAmount = (subtotal * checkoutData.discount) / 100;
@@ -25,11 +29,31 @@ export default function InvoicePrint({
   const change         = checkoutData.cash_received - total;
   const now            = new Date().toISOString();
 
-  // Dispara la impresión automáticamente al montar el componente
+  // Cargar datos de empresa para el encabezado del comprobante
   useEffect(() => {
-    const timer = setTimeout(() => window.print(), 300);
+    supabase
+      .from('app_settings')
+      .select('*')
+      .eq('id', SETTINGS_ID)
+      .single()
+      .then(({ data }) => { if (data) setSettings(data as AppSettings); });
+  }, []);
+
+  // Dispara la impresión automáticamente al montar
+  useEffect(() => {
+    const timer = setTimeout(() => window.print(), 400);
     return () => clearTimeout(timer);
   }, []);
+
+  const companyName = settings?.company_name || 'FERRETERÍA';
+  const nit         = settings?.nit          || '—';
+  const address     = settings?.address      || '—';
+  const phone       = settings?.phone        || '—';
+  const resolution  = settings?.dian_resolution || '';
+  const prefix      = settings?.dian_prefix    || '';
+  const dianFrom    = settings?.dian_from      ?? '';
+  const dianTo      = settings?.dian_to        ?? '';
+  const dianUntil   = settings?.dian_valid_until || '';
 
   return (
     <>
@@ -45,7 +69,7 @@ export default function InvoicePrint({
         }
       `}</style>
 
-      {/* ── Overlay de pantalla (solo en pantalla, no en impresión) ── */}
+      {/* ── Overlay de pantalla ── */}
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 print:hidden">
         <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl text-center space-y-4">
           <div className="flex justify-center">
@@ -69,13 +93,13 @@ export default function InvoicePrint({
           <div className="flex gap-3">
             <button
               onClick={() => window.print()}
-              className="flex-1 rounded-xl border border-orange-300 py-2.5 text-sm font-medium text-orange-600 hover:bg-orange-50"
+              className="flex-1 rounded-xl border border-sky-300 py-2.5 text-sm font-medium text-sky-600 hover:bg-sky-50"
             >
               Reimprimir
             </button>
             <button
               onClick={onClose}
-              className="flex-1 rounded-xl bg-orange-500 py-2.5 text-sm font-bold text-white hover:bg-orange-600"
+              className="flex-1 rounded-xl bg-sky-500 py-2.5 text-sm font-bold text-white hover:bg-sky-600"
             >
               Nueva venta
             </button>
@@ -83,21 +107,36 @@ export default function InvoicePrint({
         </div>
       </div>
 
-      {/* ── Contenido imprimible (oculto en pantalla, visible solo al imprimir) ── */}
+      {/* ── Contenido imprimible DEE POS (oculto en pantalla) ── */}
       <div id="invoice-print-root" ref={printRef}>
         <div style={{ fontFamily: 'monospace', fontSize: '12px', width: '72mm', padding: '2mm' }}>
-          {/* Encabezado */}
-          <div style={{ textAlign: 'center', marginBottom: '6px' }}>
-            <p style={{ fontSize: '15px', fontWeight: 'bold', margin: 0 }}>FERRETERÍA</p>
-            <p style={{ fontSize: '11px', margin: '2px 0' }}>NIT: — · Tel: —</p>
-            <p style={{ fontSize: '11px', margin: 0 }}>Dirección: —</p>
+
+          {/* Encabezado empresa */}
+          <div style={{ textAlign: 'center', marginBottom: '4px' }}>
+            <p style={{ fontSize: '15px', fontWeight: 'bold', margin: 0 }}>{companyName}</p>
+            <p style={{ fontSize: '10px', margin: '1px 0' }}>NIT: {nit}</p>
+            <p style={{ fontSize: '10px', margin: '1px 0' }}>{address}</p>
+            <p style={{ fontSize: '10px', margin: '1px 0' }}>Tel: {phone}</p>
           </div>
+
+          {/* Datos DEE POS — resolución DIAN */}
+          {resolution && (
+            <>
+              <hr style={{ borderTop: '1px dashed #000', margin: '3px 0' }} />
+              <div style={{ fontSize: '9px', textAlign: 'center', lineHeight: '1.4' }}>
+                <p style={{ margin: 0, fontWeight: 'bold' }}>DOCUMENTO EQUIVALENTE ELECTRÓNICO</p>
+                <p style={{ margin: '1px 0' }}>Res. DIAN N° {resolution}</p>
+                {prefix && <p style={{ margin: '1px 0' }}>Prefijo: {prefix} · Rango: {dianFrom}–{dianTo}</p>}
+                {dianUntil && <p style={{ margin: '1px 0' }}>Vigencia: {dianUntil}</p>}
+              </div>
+            </>
+          )}
 
           <hr style={{ borderTop: '1px dashed #000', margin: '4px 0' }} />
 
           {/* Datos de la venta */}
           <p style={{ margin: '2px 0' }}>
-            <strong>Factura:</strong> #{saleId?.slice(-8).toUpperCase() ?? 'N/A'}
+            <strong>Doc:</strong> {prefix}{saleId?.slice(-8).toUpperCase() ?? 'N/A'}
           </p>
           <p style={{ margin: '2px 0' }}>
             <strong>Fecha:</strong> {formatDateTime(now)}
@@ -170,13 +209,8 @@ export default function InvoicePrint({
 
           <hr style={{ borderTop: '1px dashed #000', margin: '6px 0' }} />
 
-          {/* Pie de página */}
-          <p style={{ textAlign: 'center', fontSize: '11px', margin: 0 }}>
-            ¡Gracias por su compra!
-          </p>
-          <p style={{ textAlign: 'center', fontSize: '10px', color: '#555', marginTop: '2px' }}>
-            Conserve esta factura
-          </p>
+          <p style={{ textAlign: 'center', fontSize: '11px', margin: 0 }}>¡Gracias por su compra!</p>
+          <p style={{ textAlign: 'center', fontSize: '10px', color: '#555', marginTop: '2px' }}>Conserve este documento</p>
         </div>
       </div>
     </>

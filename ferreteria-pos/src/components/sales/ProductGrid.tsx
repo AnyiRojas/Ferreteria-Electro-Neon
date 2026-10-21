@@ -34,14 +34,14 @@ export default function ProductGrid({
           value={search}
           onChange={(e) => onSearch(e.target.value)}
           placeholder="Buscar producto o código…"
-          className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+          className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
         />
       </div>
 
       {/* Grid */}
       {loading ? (
         <div className="flex flex-1 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
         </div>
       ) : products.length === 0 ? (
         <div className="flex flex-1 flex-col items-center justify-center text-gray-400 gap-2">
@@ -64,7 +64,7 @@ export default function ProductGrid({
                   onClick={() => onAdd(p)}
                   disabled={disabled}
                   title={disabled ? (isOut ? 'Agotado' : `Solo quedan ${p.stock} und y ya están en el carrito`) : ''}
-                  className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-left transition-all hover:border-orange-300 hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white text-left transition-all hover:border-sky-300 hover:shadow-md active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {/* Image */}
                   <div className="relative h-24 w-full bg-gray-50">
@@ -97,7 +97,7 @@ export default function ProductGrid({
                     {/* Badge stock bajo (quedan pocas unidades y aún disponible) */}
                     {!isOut && !maxed && available <= 3 && (
                       <div className="absolute left-1.5 top-1.5">
-                        <span className="rounded-full bg-orange-500 px-1.5 py-0.5 text-xs font-bold text-white">
+                        <span className="rounded-full bg-sky-500 px-1.5 py-0.5 text-xs font-bold text-white">
                           {available} disp.
                         </span>
                       </div>
@@ -111,7 +111,7 @@ export default function ProductGrid({
                     </p>
                     <div className="mt-auto flex items-center justify-between pt-1.5">
                       <div>
-                        <p className="text-xs font-bold text-orange-600">
+                        <p className="text-xs font-bold text-sky-600">
                           {formatCurrency(p.price)}
                         </p>
                         {/* Stock siempre visible para el vendedor */}
@@ -119,7 +119,7 @@ export default function ProductGrid({
                           {p.stock} en stock{inCart > 0 ? ` · ${inCart} en carrito` : ''}
                         </p>
                       </div>
-                      <div className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors ${disabled ? 'bg-gray-200' : 'bg-orange-500'}`}>
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-full transition-colors ${disabled ? 'bg-gray-200' : 'bg-sky-500'}`}>
                         <Plus className={`h-3 w-3 ${disabled ? 'text-gray-400' : 'text-white'}`} />
                       </div>
                     </div>

@@ -20,7 +20,7 @@ const PERIOD_LABELS: Record<Period, string> = {
   year: 'Último año',
 };
 
-const COLORS = ['#f97316', '#3b82f6', '#22c55e', '#a855f7', '#eab308', '#06b6d4', '#ef4444', '#6b7280'];
+const COLORS = ['#1CA7EC', '#3b82f6', '#22c55e', '#a855f7', '#eab308', '#06b6d4', '#ef4444', '#6b7280'];
 
 function getPeriodRange(period: Period): { from: Date; to: Date; groupBy: 'day' | 'week' | 'month' } {
   const to = new Date();
@@ -208,7 +208,7 @@ export default function ReportsPage() {
                   key={p}
                   onClick={() => setPeriod(p)}
                   className={`px-3 py-2 font-medium transition-colors ${
-                    period === p ? 'bg-orange-500 text-white' : 'text-gray-600 hover:bg-gray-50'
+                    period === p ? 'bg-sky-500 text-white' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   {p === 'week' ? '7 días' : p === 'month' ? 'Mes' : p === 'quarter' ? '3 meses' : 'Año'}
@@ -227,14 +227,14 @@ export default function ReportsPage() {
 
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
           </div>
         ) : (
           <>
             {/* KPI Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
-                { label: 'Ingresos totales', value: formatCurrency(summary.revenue), icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-50' },
+                { label: 'Ingresos totales', value: formatCurrency(summary.revenue), icon: TrendingUp, color: 'text-sky-500', bg: 'bg-sky-50' },
                 { label: 'Total ventas', value: summary.sales.toString(), icon: ShoppingBag, color: 'text-blue-500', bg: 'bg-blue-50' },
                 { label: 'Ticket promedio', value: formatCurrency(summary.avgTicket), icon: CreditCard, color: 'text-green-500', bg: 'bg-green-50' },
                 { label: 'Período más activo', value: summary.topDay || '—', icon: Package, color: 'text-purple-500', bg: 'bg-purple-50' },
@@ -272,7 +272,7 @@ export default function ReportsPage() {
                       }
                     />
                     <Legend />
-                    <Line yAxisId="left" type="monotone" dataKey="ingresos" stroke="#f97316" strokeWidth={2} dot={false} name="ingresos" />
+                    <Line yAxisId="left" type="monotone" dataKey="ingresos" stroke="#1CA7EC" strokeWidth={2} dot={false} name="ingresos" />
                     <Line yAxisId="right" type="monotone" dataKey="ventas" stroke="#3b82f6" strokeWidth={2} dot={false} name="ventas" />
                   </LineChart>
                 </ResponsiveContainer>
@@ -293,7 +293,7 @@ export default function ReportsPage() {
                       <XAxis type="number" tickFormatter={v => `$${(v/1000).toFixed(0)}k`} tick={{ fontSize: 10 }} />
                       <YAxis type="category" dataKey="name" width={110} tick={{ fontSize: 10 }} />
                       <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                      <Bar dataKey="ingresos" fill="#f97316" radius={[0, 4, 4, 0]} name="Ingresos" />
+                      <Bar dataKey="ingresos" fill="#1CA7EC" radius={[0, 4, 4, 0]} name="Ingresos" />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -370,7 +370,7 @@ export default function ReportsPage() {
                       <tr className="border-t-2 border-gray-200 font-semibold">
                         <td className="pt-3 text-gray-900">Total</td>
                         <td className="pt-3 text-right text-gray-900">{summary.sales}</td>
-                        <td className="pt-3 text-right text-orange-600">{formatCurrency(summary.revenue)}</td>
+                        <td className="pt-3 text-right text-sky-600">{formatCurrency(summary.revenue)}</td>
                         <td className="pt-3 text-right text-gray-900">{formatCurrency(summary.avgTicket)}</td>
                         <td className="pt-3 text-right text-gray-900">100%</td>
                       </tr>

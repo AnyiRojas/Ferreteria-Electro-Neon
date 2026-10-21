@@ -1,0 +1,50 @@
+/*
+ * ============================================================
+ * BACKUP DE PALETA DE COLORES — versión original (rojo/naranja)
+ * ============================================================
+ *
+ * ACENTO PRINCIPAL (naranja)
+ *   #f97316  — orange-500  (botones primarios, tabs activos, íconos)
+ *   #ea580c  — orange-600  (hover de botones)
+ *   #fed7aa  — orange-200  (bordes hover en POS)
+ *   #fff7ed  — orange-50   (fondos suaves de botón activo)
+ *
+ * PANTALLA DE LOGIN (page.tsx)
+ *   Fondo:          #111111
+ *   Gradiente halo: radial de #dc2626 (red-600) → transparent
+ *   Barra superior: linear #7f1d1d → #dc2626 → #ef4444 → #7f1d1d
+ *   Grid decorativo: #dc2626 @ 3% opacidad
+ *   Cards admin:
+ *     background:  linear-gradient(145deg, #1a0505, #1f1f1f)
+ *     border idle: rgba(220,38,38,0.3)   — red-600
+ *     border hover:rgba(220,38,38,0.8)
+ *     shadow hover:rgba(220,38,38,0.25)
+ *     ícono bg:    linear-gradient(135deg, #7f1d1d, #dc2626)
+ *     botón bg:    linear-gradient(135deg, #dc2626, #b91c1c)
+ *     badges:      rgba(220,38,38,0.1) / color #fca5a5
+ *   Cards cajero:
+ *     background:  linear-gradient(145deg, #0f1a0f, #1f1f1f)
+ *     border idle: rgba(75,85,99,0.4)
+ *     border hover:rgba(156,163,175,0.7)
+ *     ícono bg:    linear-gradient(135deg, #374151, #6b7280)
+ *     botón bg:    linear-gradient(135deg, #374151, #1f2937)
+ *
+ * SIDEBAR
+ *   Fondo:          #111827  (gray-900)
+ *   Separadores:    #374151  (gray-700)
+ *   Link activo:    bg #f97316 text white
+ *   Link hover:     bg #1f2937 text white
+ *   Badge admin:    bg rgba(249,115,22,0.1) text #f97316 border rgba(249,115,22,0.2)
+ *   Badge caja:     bg rgba(59,130,246,0.1) text #60a5fa  border rgba(59,130,246,0.2)
+ *
+ * COMPONENTES GENERALES
+ *   Focus ring:     ring-orange-400  (#fb923c)
+ *   Botón primario: bg-orange-500 hover:bg-orange-600
+ *   Botón peligro:  bg-red-600    hover:bg-red-700
+ *   Botón éxito:    bg-green-600  hover:bg-green-700
+ *   Stock bajo:     bg-amber-100 text-amber-700
+ *   Stock cero:     bg-red-100   text-red-700
+ *   Stock ok:       bg-green-100 text-green-700
+ *   Toast:          bg #111827 text white
+ * ============================================================
+ */

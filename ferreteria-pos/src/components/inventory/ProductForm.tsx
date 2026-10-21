@@ -121,7 +121,7 @@ export default function ProductForm({
         value={form[key]}
         onChange={set(key)}
         className={cn(
-          'mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400',
+          'mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400',
           errors[key] ? 'border-red-400' : 'border-gray-300'
         )}
       />
@@ -173,7 +173,7 @@ export default function ProductForm({
               }
               rows={2}
               placeholder="Descripción breve del producto…"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
 
@@ -214,7 +214,7 @@ export default function ProductForm({
               <select
                 value={form.category_id}
                 onChange={set('category_id')}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               >
                 <option value="">Sin categoría</option>
                 {categories.map((c) => (
@@ -231,7 +231,7 @@ export default function ProductForm({
               <select
                 value={form.unit}
                 onChange={set('unit')}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               >
                 {UNITS.map((u) => (
                   <option key={u} value={u}>
@@ -259,7 +259,7 @@ export default function ProductForm({
             <button
               type="submit"
               disabled={saving}
-              className="flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-medium text-white hover:bg-orange-600 disabled:opacity-60"
+              className="flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-white hover:bg-sky-600 disabled:opacity-60"
             >
               {saving ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

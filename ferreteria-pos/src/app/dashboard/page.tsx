@@ -167,8 +167,8 @@ export default function DashboardPage() {
             change={stats.revenueChange}
             changeLabel="vs ayer"
             icon={DollarSign}
-            iconColor="text-orange-600"
-            iconBg="bg-orange-100"
+            iconColor="text-sky-600"
+            iconBg="bg-sky-100"
             loading={loadingStats}
           />
           <StatsCard

@@ -29,7 +29,7 @@ export default function TopProducts({ data, loading = false }: TopProductsProps)
 
       {loading ? (
         <div className="flex h-48 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
         </div>
       ) : data.length === 0 ? (
         <div className="flex h-48 items-center justify-center text-sm text-gray-400">
@@ -71,7 +71,7 @@ export default function TopProducts({ data, loading = false }: TopProductsProps)
                 border: '1px solid #e5e7eb',
               }}
             />
-            <Bar dataKey="revenue" fill="#f97316" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="revenue" fill="#1CA7EC" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       )}

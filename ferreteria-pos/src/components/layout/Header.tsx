@@ -33,9 +33,10 @@ export default function Header({ onMenuClick, title }: HeaderProps) {
         </button>
         <button className="relative rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700">
           <Bell className="h-5 w-5" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-orange-500" />
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full" style={{ background: '#1CA7EC' }} />
         </button>
-        <div className="ml-1 flex h-9 w-9 items-center justify-center rounded-full bg-orange-500 text-sm font-bold text-white">
+        <div className="ml-1 flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold text-white"
+          style={{ background: 'linear-gradient(135deg, #1CA7EC, #787FF6)' }}>
           A
         </div>
       </div>

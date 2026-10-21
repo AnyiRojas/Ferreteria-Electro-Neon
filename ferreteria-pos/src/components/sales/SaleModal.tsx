@@ -89,7 +89,7 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
                   onClick={() => setPaymentMethod(value)}
                   className={`flex flex-col items-center gap-1 rounded-xl border-2 p-3 text-xs font-medium transition-colors ${
                     paymentMethod === value
-                      ? 'border-orange-500 bg-orange-50 text-orange-600'
+                      ? 'border-sky-500 bg-sky-50 text-sky-600'
                       : 'border-gray-200 text-gray-500 hover:border-gray-300'
                   }`}
                 >
@@ -113,7 +113,7 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
                   value={cashReceived}
                   onChange={(e) => setCashReceived(e.target.value)}
                   placeholder={formatCurrency(total)}
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
                 />
                 {/* Quick cash buttons */}
                 <div className="mt-2 flex flex-wrap gap-1.5">
@@ -128,7 +128,7 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
                   ))}
                   <button
                     onClick={() => setCashReceived(Math.ceil(total / 1000) * 1000 + '')}
-                    className="rounded-lg border border-orange-200 px-2.5 py-1 text-xs font-medium text-orange-500 hover:bg-orange-50"
+                    className="rounded-lg border border-sky-200 px-2.5 py-1 text-xs font-medium text-sky-500 hover:bg-sky-50"
                   >
                     Exacto
                   </button>
@@ -154,7 +154,7 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Cliente, observaciones…"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
 
@@ -172,7 +172,7 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
                 processing ||
                 (paymentMethod === 'cash' && cash < total)
               }
-              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-orange-500 py-3 text-sm font-bold text-white hover:bg-orange-600 disabled:opacity-60"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-sky-500 py-3 text-sm font-bold text-white hover:bg-sky-600 disabled:opacity-60"
             >
               {processing && <Loader2 className="h-4 w-4 animate-spin" />}
               Confirmar venta

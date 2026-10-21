@@ -136,6 +136,9 @@ export default function SalesPage() {
       subtotal: i.subtotal,
     }));
 
+    // Recuperar el turno de caja activo (si existe)
+    const registerId = sessionStorage.getItem('active_register_id') ?? null;
+
     const { data: saleId, error } = await supabase.rpc('process_sale', {
       p_items: items,
       p_total: total,
@@ -144,6 +147,7 @@ export default function SalesPage() {
       p_cash_received: data.cash_received,
       p_change_given: data.cash_received - total,
       p_notes: data.notes || null,
+      p_register_id: registerId,
     });
 
     if (error) {
@@ -196,8 +200,8 @@ export default function SalesPage() {
               onClick={() => setCategoryFilter('')}
               className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                 categoryFilter === ''
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-white border border-gray-200 text-gray-600 hover:border-orange-300'
+                  ? 'bg-sky-500 text-white'
+                  : 'bg-white border border-gray-200 text-gray-600 hover:border-sky-300'
               }`}
             >
               Todos
@@ -208,8 +212,8 @@ export default function SalesPage() {
                 onClick={() => setCategoryFilter(c.id)}
                 className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
                   categoryFilter === c.id
-                    ? 'bg-orange-500 text-white'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:border-orange-300'
+                    ? 'bg-sky-500 text-white'
+                    : 'bg-white border border-gray-200 text-gray-600 hover:border-sky-300'
                 }`}
               >
                 {c.name}
@@ -218,7 +222,7 @@ export default function SalesPage() {
             {/* History button */}
             <button
               onClick={openHistory}
-              className="ml-auto shrink-0 flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:border-orange-300"
+              className="ml-auto shrink-0 flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:border-sky-300"
             >
               <History className="h-3.5 w-3.5" />
               Historial
@@ -288,7 +292,7 @@ export default function SalesPage() {
             <div className="flex-1 overflow-y-auto divide-y divide-gray-100">
               {loadingHistory ? (
                 <div className="flex h-32 items-center justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
                 </div>
               ) : recentSales.length === 0 ? (
                 <p className="py-16 text-center text-sm text-gray-400">

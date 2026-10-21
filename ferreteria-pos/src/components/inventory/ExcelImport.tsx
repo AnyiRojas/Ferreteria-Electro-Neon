@@ -264,7 +264,7 @@ export default function ExcelImport({ onImportComplete, onClose }: ExcelImportPr
                 ['F. COMPRA', 'Fecha compra (se ignora)'],
               ].map(([col, note]) => (
                 <div key={col} className="flex items-center gap-1.5">
-                  <code className="text-xs bg-white border rounded px-1.5 py-0.5 text-orange-600 font-mono whitespace-nowrap">{col}</code>
+                  <code className="text-xs bg-white border rounded px-1.5 py-0.5 text-sky-600 font-mono whitespace-nowrap">{col}</code>
                   <span className="text-xs text-gray-400">{note}</span>
                 </div>
               ))}
@@ -278,7 +278,7 @@ export default function ExcelImport({ onImportComplete, onClose }: ExcelImportPr
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
             className={`cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors ${
-              dragging ? 'border-orange-400 bg-orange-50' : 'border-gray-300 hover:border-orange-400 hover:bg-orange-50'
+              dragging ? 'border-sky-400 bg-sky-50' : 'border-gray-300 hover:border-sky-400 hover:bg-sky-50'
             }`}
           >
             <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
@@ -370,7 +370,7 @@ export default function ExcelImport({ onImportComplete, onClose }: ExcelImportPr
             <button
               onClick={runImport}
               disabled={importing || preview.length === 0}
-              className="flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2 text-sm font-medium text-white hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 rounded-lg bg-sky-500 px-5 py-2 text-sm font-medium text-white hover:bg-sky-600 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {importing ? (
                 <>

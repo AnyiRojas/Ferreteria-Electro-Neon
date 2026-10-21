@@ -161,3 +161,152 @@ export interface ApiResponse<T> {
   data: T | null;
   error: string | null;
 }
+
+// ─── Cash Register (Apertura/Cierre de Caja) ─────────────────────────────────
+
+export type CashRegisterStatus = 'open' | 'closed';
+
+export interface CashRegister {
+  id: string;
+  opened_at: string;
+  closed_at: string | null;
+  opening_balance: number;
+  closing_balance: number | null;
+  status: CashRegisterStatus;
+  notes: string | null;
+  total_cash: number | null;
+  total_card: number | null;
+  total_transfer: number | null;
+  total_sales: number | null;
+  difference: number | null;
+  created_by: string | null;
+}
+
+export interface CashMovement {
+  id: string;
+  register_id: string;
+  type: 'income' | 'expense';
+  amount: number;
+  description: string;
+  created_at: string;
+}
+
+// ─── Customers ────────────────────────────────────────────────────────────────
+
+export interface Customer {
+  id: string;
+  name: string;
+  document_type: 'CC' | 'NIT' | 'CE' | 'PP';
+  document_number: string;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+// ─── Suppliers ────────────────────────────────────────────────────────────────
+
+export interface Supplier {
+  id: string;
+  name: string;
+  nit: string | null;
+  contact_name: string | null;
+  email: string | null;
+  phone: string | null;
+  address: string | null;
+  city: string | null;
+  active: boolean;
+  created_at: string;
+}
+
+export interface PurchaseOrder {
+  id: string;
+  supplier_id: string;
+  status: 'pending' | 'received' | 'cancelled';
+  total: number;
+  notes: string | null;
+  created_at: string;
+  received_at: string | null;
+  supplier?: Supplier;
+  items?: PurchaseOrderItem[];
+}
+
+export interface PurchaseOrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  unit_cost: number;
+  subtotal: number;
+  product?: Product;
+}
+
+// ─── Quotes / Cotizaciones ────────────────────────────────────────────────────
+
+export interface Quote {
+  id: string;
+  customer_id: string | null;
+  customer_name: string | null;
+  status: 'draft' | 'sent' | 'approved' | 'rejected';
+  total: number;
+  discount: number;
+  valid_until: string | null;
+  notes: string | null;
+  created_at: string;
+  customer?: Customer;
+  items?: QuoteItem[];
+}
+
+export interface QuoteItem {
+  id: string;
+  quote_id: string;
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  product?: Product;
+}
+
+// ─── Returns / Devoluciones ───────────────────────────────────────────────────
+
+export interface Return {
+  id: string;
+  sale_id: string | null;
+  reason: string;
+  total: number;
+  status: 'pending' | 'approved' | 'rejected';
+  notes: string | null;
+  created_at: string;
+  items?: ReturnItem[];
+}
+
+export interface ReturnItem {
+  id: string;
+  return_id: string;
+  product_id: string;
+  quantity: number;
+  unit_price: number;
+  subtotal: number;
+  product?: Product;
+}
+
+// ─── App Settings ─────────────────────────────────────────────────────────────
+
+export interface AppSettings {
+  company_name: string;
+  nit: string;
+  address: string;
+  city: string;
+  phone: string;
+  email: string;
+  dian_resolution: string;
+  dian_prefix: string;
+  dian_from: number;
+  dian_to: number;
+  dian_valid_until: string;
+  printer_name: string;
+  drawer_enabled: boolean;
+  drawer_port: string;
+}

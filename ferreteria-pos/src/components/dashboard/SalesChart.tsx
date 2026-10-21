@@ -42,7 +42,7 @@ const CustomTooltip = ({
       <p className="mb-2 text-sm font-semibold text-gray-700">{label}</p>
       {payload.map((p) => (
         <p key={p.name} className="text-sm text-gray-600">
-          <span className="font-medium text-orange-600">
+          <span className="font-medium text-sky-600">
             {formatCurrency(p.value)}
           </span>
           {p.name === 'count' && (
@@ -76,7 +76,7 @@ export default function SalesChart({
               onClick={() => onFilterChange(value)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                 filter === value
-                  ? 'bg-white text-orange-600 shadow-sm'
+                  ? 'bg-white text-sky-600 shadow-sm'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -88,7 +88,7 @@ export default function SalesChart({
 
       {loading ? (
         <div className="flex h-56 items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
         </div>
       ) : data.length === 0 ? (
         <div className="flex h-56 items-center justify-center text-sm text-gray-400">
@@ -123,10 +123,10 @@ export default function SalesChart({
             <Line
               type="monotone"
               dataKey="revenue"
-              stroke="#f97316"
+              stroke="#1CA7EC"
               strokeWidth={2}
               dot={false}
-              activeDot={{ r: 5, fill: '#f97316' }}
+              activeDot={{ r: 5, fill: '#1CA7EC' }}
             />
           </LineChart>
         </ResponsiveContainer>

@@ -239,7 +239,7 @@ export default function InventoryPage() {
             </button>
             <button
               onClick={openAdd}
-              className="flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-medium text-white hover:bg-orange-600 active:scale-95 transition-transform"
+              className="flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600 active:scale-95 transition-transform"
             >
               <Plus className="h-4 w-4" />
               Nuevo producto
@@ -256,7 +256,7 @@ export default function InventoryPage() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar por nombre, código…"
-              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
             {search && (
               <button
@@ -274,7 +274,7 @@ export default function InventoryPage() {
             <select
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-lg border border-gray-200 py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="rounded-lg border border-gray-200 py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             >
               <option value="">Todas las categorías</option>
               {categories.map((c) => (
@@ -291,7 +291,7 @@ export default function InventoryPage() {
               type="checkbox"
               checked={activeOnly}
               onChange={(e) => setActiveOnly(e.target.checked)}
-              className="rounded border-gray-300 accent-orange-500"
+              className="rounded border-gray-300 accent-sky-500"
             />
             Solo activos
           </label>
@@ -310,7 +310,7 @@ export default function InventoryPage() {
               onClick={() => setView('table')}
               className={`p-2 transition-colors ${
                 view === 'table'
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-sky-500 text-white'
                   : 'text-gray-400 hover:bg-gray-50'
               }`}
             >
@@ -320,7 +320,7 @@ export default function InventoryPage() {
               onClick={() => setView('grid')}
               className={`p-2 transition-colors ${
                 view === 'grid'
-                  ? 'bg-orange-500 text-white'
+                  ? 'bg-sky-500 text-white'
                   : 'text-gray-400 hover:bg-gray-50'
               }`}
             >
@@ -343,7 +343,7 @@ export default function InventoryPage() {
           />
         ) : loading ? (
           <div className="flex h-64 items-center justify-center">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
@@ -470,7 +470,7 @@ export default function InventoryPage() {
                   value={adjustQty}
                   onChange={(e) => setAdjustQty(e.target.value)}
                   placeholder="0"
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
                 />
               </div>
 
@@ -483,14 +483,14 @@ export default function InventoryPage() {
                   value={adjustReason}
                   onChange={(e) => setAdjustReason(e.target.value)}
                   placeholder="Compra, devolución, pérdida…"
-                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
                 />
               </div>
 
               <button
                 onClick={handleAdjust}
                 disabled={adjusting || !adjustQty}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-orange-500 py-2.5 text-sm font-medium text-white hover:bg-orange-600 disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-sky-500 py-2.5 text-sm font-medium text-white hover:bg-sky-600 disabled:opacity-60"
               >
                 {adjusting && <Loader2 className="h-4 w-4 animate-spin" />}
                 Aplicar ajuste

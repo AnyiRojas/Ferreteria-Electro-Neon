@@ -29,11 +29,11 @@ export default function POSCart({
     <div className="flex flex-col h-full bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
-        <ShoppingCart className="h-5 w-5 text-orange-500" />
+        <ShoppingCart className="h-5 w-5 text-sky-500" />
         <h3 className="font-semibold text-gray-800">
           Carrito
         </h3>
-        <span className="ml-auto rounded-full bg-orange-100 px-2 py-0.5 text-xs font-bold text-orange-600">
+        <span className="ml-auto rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-600">
           {items.length}
         </span>
       </div>
@@ -105,7 +105,7 @@ export default function POSCart({
               value={discount || ''}
               onChange={(e) => onDiscountChange(Math.min(100, Math.max(0, Number(e.target.value))))}
               placeholder="0"
-              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>
 
@@ -128,7 +128,7 @@ export default function POSCart({
 
           <button
             onClick={onCheckout}
-            className="w-full rounded-xl bg-orange-500 py-3 text-sm font-bold text-white hover:bg-orange-600 active:scale-95 transition-transform"
+            className="w-full rounded-xl bg-sky-500 py-3 text-sm font-bold text-white hover:bg-sky-600 active:scale-95 transition-transform"
           >
             Cobrar {formatCurrency(total)}
           </button>

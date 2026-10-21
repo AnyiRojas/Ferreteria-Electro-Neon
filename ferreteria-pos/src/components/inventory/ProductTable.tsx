@@ -164,7 +164,7 @@ export default function ProductTable({
                       <button onClick={() => onAdjust(p)} className="rounded-md px-2 py-1 text-xs font-medium text-gray-600 hover:bg-gray-100">
                         Stock
                       </button>
-                      <button onClick={() => onEdit(p)} className="rounded-md p-1.5 text-orange-500 hover:bg-orange-50">
+                      <button onClick={() => onEdit(p)} className="rounded-md p-1.5 text-sky-500 hover:bg-sky-50">
                         <Edit2 className="h-4 w-4" />
                       </button>
                       <button

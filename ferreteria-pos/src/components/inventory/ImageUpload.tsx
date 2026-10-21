@@ -149,21 +149,21 @@ export default function ImageUpload({
           className={cn(
             'flex h-40 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed transition-colors',
             dragOver
-              ? 'border-orange-400 bg-orange-50'
-              : 'border-gray-300 bg-gray-50 hover:border-orange-300 hover:bg-orange-50'
+              ? 'border-sky-400 bg-sky-50'
+              : 'border-gray-300 bg-gray-50 hover:border-sky-300 hover:bg-sky-50'
           )}
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-orange-500 border-t-transparent" />
-              <p className="text-xs font-medium text-orange-500">{progress}</p>
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
+              <p className="text-xs font-medium text-sky-500">{progress}</p>
             </div>
           ) : (
             <>
-              <div className="mb-2 rounded-full bg-orange-100 p-3">
+              <div className="mb-2 rounded-full bg-sky-100 p-3">
                 {dragOver
-                  ? <Upload    className="h-6 w-6 text-orange-500" />
-                  : <ImageIcon className="h-6 w-6 text-orange-400" />
+                  ? <Upload    className="h-6 w-6 text-sky-500" />
+                  : <ImageIcon className="h-6 w-6 text-sky-400" />
                 }
               </div>
               <p className="text-sm font-medium text-gray-600">

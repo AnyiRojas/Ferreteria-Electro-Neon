@@ -19,8 +19,8 @@ export default function StatsCard({
   change,
   changeLabel,
   icon: Icon,
-  iconColor = 'text-orange-600',
-  iconBg = 'bg-orange-100',
+  iconColor = 'text-sky-600',
+  iconBg = 'bg-sky-100',
   loading = false,
 }: StatsCardProps) {
   const isPositive = change !== undefined && change > 0;
