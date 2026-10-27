@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Minus, Plus, Trash2, ShoppingCart } from 'lucide-react';
 import type { CartItem } from '@/types';
 import { formatCurrency } from '@/lib/utils';
@@ -11,6 +12,130 @@ interface POSCartProps {
   onRemove: (productId: string) => void;
   onDiscountChange: (discount: number) => void;
   onCheckout: () => void;
+}
+
+// Sub-componente para editar cantidad con input directo
+function QtyEditor({
+  item,
+  onUpdateQty,
+  onRemove,
+}: {
+  item: CartItem;
+  onUpdateQty: (id: string, qty: number) => void;
+  onRemove: (id: string) => void;
+}) {
+  const [inputVal, setInputVal] = useState(item.quantity.toString());
+  const [editing, setEditing] = useState(false);
+  const [overStock, setOverStock] = useState(false); // alerta de exceso de stock
+
+  const commit = (val: string) => {
+    const n = parseInt(val, 10);
+    setOverStock(false);
+    if (!isNaN(n) && n <= 0) {
+      onRemove(item.product.id);
+    } else if (!isNaN(n) && n > item.product.stock) {
+      // Supera stock: aplicar el máximo y mostrar alerta
+      onUpdateQty(item.product.id, item.product.stock);
+      setInputVal(item.product.stock.toString());
+      setOverStock(true);
+      // Ocultar alerta después de 3 segundos
+      setTimeout(() => setOverStock(false), 3000);
+    } else if (!isNaN(n) && n > 0) {
+      onUpdateQty(item.product.id, n);
+      setInputVal(n.toString());
+    } else {
+      setInputVal(item.quantity.toString());
+    }
+    setEditing(false);
+  };
+
+  // Sincronizar si el qty cambia externamente
+  if (!editing && item.quantity.toString() !== inputVal && !overStock) {
+    setInputVal(item.quantity.toString());
+  }
+
+  return (
+    <div className="flex flex-col items-end gap-0.5">
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => {
+            const next = item.quantity - 1;
+            if (next <= 0) { onRemove(item.product.id); return; }
+            onUpdateQty(item.product.id, next);
+            setInputVal(next.toString());
+            setOverStock(false);
+          }}
+          className="flex h-6 w-6 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50"
+        >
+          <Minus className="h-3 w-3" />
+        </button>
+
+        {/* Input directo editable */}
+        <input
+          type="number"
+          min="1"
+          max={item.product.stock}
+          value={editing ? inputVal : item.quantity}
+          onFocus={() => {
+            setEditing(true);
+            setOverStock(false);
+            setInputVal(item.quantity.toString());
+          }}
+          onChange={(e) => {
+            setInputVal(e.target.value);
+            // Alerta visual en tiempo real si supera stock
+            const n = parseInt(e.target.value, 10);
+            setOverStock(!isNaN(n) && n > item.product.stock);
+          }}
+          onBlur={(e) => commit(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') commit(inputVal);
+            if (e.key === 'Escape') {
+              setInputVal(item.quantity.toString());
+              setOverStock(false);
+              setEditing(false);
+            }
+          }}
+          className={`w-10 rounded-md border text-center text-sm font-semibold py-0.5 focus:outline-none focus:ring-2 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+            overStock
+              ? 'border-red-400 bg-red-50 text-red-600 focus:ring-red-400'
+              : 'border-gray-200 text-gray-800 focus:ring-sky-400'
+          }`}
+        />
+
+        <button
+          onClick={() => {
+            const next = item.quantity + 1;
+            if (next > item.product.stock) {
+              setOverStock(true);
+              setTimeout(() => setOverStock(false), 3000);
+              return;
+            }
+            onUpdateQty(item.product.id, next);
+            setInputVal(next.toString());
+          }}
+          disabled={item.quantity >= item.product.stock}
+          className="flex h-6 w-6 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"
+        >
+          <Plus className="h-3 w-3" />
+        </button>
+
+        <button
+          onClick={() => onRemove(item.product.id)}
+          className="ml-1 flex h-6 w-6 items-center justify-center rounded-md text-red-400 hover:bg-red-50"
+        >
+          <Trash2 className="h-3 w-3" />
+        </button>
+      </div>
+
+      {/* Alerta de stock insuficiente */}
+      {overStock && (
+        <p className="text-xs font-medium text-red-500 leading-none">
+          Máx. disponible: {item.product.stock}
+        </p>
+      )}
+    </div>
+  );
 }
 
 export default function POSCart({
@@ -30,15 +155,13 @@ export default function POSCart({
       {/* Header */}
       <div className="flex items-center gap-2 border-b border-gray-100 px-4 py-3">
         <ShoppingCart className="h-5 w-5 text-sky-500" />
-        <h3 className="font-semibold text-gray-800">
-          Carrito
-        </h3>
+        <h3 className="font-semibold text-gray-800">Carrito</h3>
         <span className="ml-auto rounded-full bg-sky-100 px-2 py-0.5 text-xs font-bold text-sky-600">
           {items.length}
         </span>
       </div>
 
-      {/* Items */}
+      {/* Items — scroll propio */}
       <div className="flex-1 overflow-y-auto divide-y divide-gray-50">
         {items.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-40 text-gray-400 gap-2">
@@ -50,41 +173,18 @@ export default function POSCart({
             <div key={item.product.id} className="px-4 py-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-800 line-clamp-1">
-                    {item.product.name}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {formatCurrency(item.unit_price)} c/u
-                  </p>
+                     <p className="text-base font-semibold text-gray-900 line-clamp-2 leading-tight">
+                       {item.product.name}
+                     </p>
+                     <p className="text-sm text-gray-500 mt-0.5">
+                       {formatCurrency(item.unit_price)} c/u
+                     </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => onUpdateQty(item.product.id, item.quantity - 1)}
-                    className="flex h-6 w-6 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50"
-                  >
-                    <Minus className="h-3 w-3" />
-                  </button>
-                  <span className="w-7 text-center text-sm font-semibold text-gray-800">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => onUpdateQty(item.product.id, item.quantity + 1)}
-                    disabled={item.quantity >= item.product.stock}
-                    className="flex h-6 w-6 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 disabled:opacity-40"
-                  >
-                    <Plus className="h-3 w-3" />
-                  </button>
-                  <button
-                    onClick={() => onRemove(item.product.id)}
-                    className="ml-1 flex h-6 w-6 items-center justify-center rounded-md text-red-400 hover:bg-red-50"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                </div>
+                <QtyEditor item={item} onUpdateQty={onUpdateQty} onRemove={onRemove} />
               </div>
-              <p className="mt-1 text-right text-sm font-semibold text-gray-700">
-                {formatCurrency(item.subtotal)}
-              </p>
+              <p className="mt-1 text-right text-base font-bold text-gray-800">
+                 {formatCurrency(item.subtotal)}
+               </p>
             </div>
           ))
         )}

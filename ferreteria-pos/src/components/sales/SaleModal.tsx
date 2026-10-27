@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { X, Banknote, CreditCard, ArrowLeftRight, Loader2 } from 'lucide-react';
+import { X, Banknote, CreditCard, ArrowLeftRight, Loader2, User } from 'lucide-react';
 import type { CartItem, CheckoutData, PaymentMethod } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 
@@ -24,6 +24,12 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
   const [notes, setNotes] = useState('');
   const [processing, setProcessing] = useState(false);
 
+  // Datos del cliente (opcionales)
+  const [customerName, setCustomerName] = useState('');
+  const [customerPhone, setCustomerPhone] = useState('');
+  const [customerIdNumber, setCustomerIdNumber] = useState('');
+  const [showCustomer, setShowCustomer] = useState(false);
+
   const subtotal = items.reduce((s, i) => s + i.subtotal, 0);
   const discountAmount = (subtotal * discount) / 100;
   const total = subtotal - discountAmount;
@@ -38,35 +44,39 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
       cash_received: paymentMethod === 'cash' ? cash : total,
       discount,
       notes,
+      customer_name: customerName.trim(),
+      customer_phone: customerPhone.trim(),
+      customer_id_number: customerIdNumber.trim(),
     });
     setProcessing(false);
-    // El modal se cierra desde el padre (sales/page.tsx) tras confirmar;
-    // InvoicePrint toma el control para mostrar/imprimir la factura.
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
+      <div className="w-full max-w-md rounded-2xl bg-white shadow-xl flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4 shrink-0">
           <h2 className="text-lg font-semibold text-gray-900">Cobrar venta</h2>
           <button onClick={onClose} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="px-6 py-5 space-y-5">
+        {/* Contenido con scroll */}
+        <div className="overflow-y-auto flex-1 px-6 py-5 space-y-5">
           {/* Items summary */}
           <div className="rounded-xl bg-gray-50 p-4 space-y-1.5">
-            {items.map((item) => (
-              <div key={item.product.id} className="flex justify-between text-sm text-gray-600">
-                <span>
-                  {item.product.name}{' '}
-                  <span className="text-gray-400">x{item.quantity}</span>
-                </span>
-                <span className="font-medium">{formatCurrency(item.subtotal)}</span>
-              </div>
-            ))}
+            <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1">
+              {items.map((item) => (
+                <div key={item.product.id} className="flex justify-between text-sm text-gray-600">
+                  <span className="mr-2 truncate">
+                    {item.product.name}{' '}
+                    <span className="text-gray-400">x{item.quantity}</span>
+                  </span>
+                  <span className="font-medium shrink-0">{formatCurrency(item.subtotal)}</span>
+                </div>
+              ))}
+            </div>
             {discount > 0 && (
               <div className="flex justify-between text-sm text-green-600 border-t border-gray-200 pt-1.5 mt-1.5">
                 <span>Descuento ({discount}%)</span>
@@ -77,6 +87,60 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
               <span>Total</span>
               <span>{formatCurrency(total)}</span>
             </div>
+          </div>
+
+          {/* Datos del cliente — desplegable opcional */}
+          <div className="rounded-xl border border-gray-200 overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setShowCustomer(v => !v)}
+              className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              <div className="flex items-center gap-2">
+                <User className="h-4 w-4 text-gray-400" />
+                <span>
+                  Datos del cliente
+                  <span className="ml-1.5 text-xs font-normal text-gray-400">(opcional — aparecen en la factura)</span>
+                </span>
+              </div>
+              <span className={`text-xs font-normal transition-colors ${showCustomer ? 'text-sky-500' : 'text-gray-400'}`}>
+                {showCustomer ? 'Ocultar ▲' : 'Agregar ▼'}
+              </span>
+            </button>
+
+            {showCustomer && (
+              <div className="border-t border-gray-100 px-4 pb-4 pt-3 space-y-3 bg-gray-50">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Nombre completo</label>
+                  <input
+                    value={customerName}
+                    onChange={e => setCustomerName(e.target.value)}
+                    placeholder="Ej: Juan Pérez"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">CC / NIT</label>
+                    <input
+                      value={customerIdNumber}
+                      onChange={e => setCustomerIdNumber(e.target.value)}
+                      placeholder="123456789"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Celular</label>
+                    <input
+                      value={customerPhone}
+                      onChange={e => setCustomerPhone(e.target.value)}
+                      placeholder="300 123 4567"
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Payment method */}
@@ -115,9 +179,17 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
                   placeholder={formatCurrency(total)}
                   className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
                 />
-                {/* Quick cash buttons */}
+                {/* Botones rápidos de billetes colombianos */}
                 <div className="mt-2 flex flex-wrap gap-1.5">
-                  {[50000, 100000, 200000].map((v) => (
+                  {/* Exacto: valor preciso del total sin redondear */}
+                  <button
+                    onClick={() => setCashReceived(total.toString())}
+                    className="rounded-lg border border-sky-400 bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-600 hover:bg-sky-100"
+                  >
+                    Exacto ({formatCurrency(total)})
+                  </button>
+                  {/* Billetes colombianos: solo los >= total */}
+                  {[5000, 10000, 20000, 50000, 100000, 200000].filter(v => v >= total).slice(0, 5).map((v) => (
                     <button
                       key={v}
                       onClick={() => setCashReceived(v.toString())}
@@ -126,12 +198,20 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
                       {formatCurrency(v)}
                     </button>
                   ))}
-                  <button
-                    onClick={() => setCashReceived(Math.ceil(total / 1000) * 1000 + '')}
-                    className="rounded-lg border border-sky-200 px-2.5 py-1 text-xs font-medium text-sky-500 hover:bg-sky-50"
-                  >
-                    Exacto
-                  </button>
+                  {/* Si el total es mayor a 200k, mostrar múltiplos de 100k útiles */}
+                  {total > 200000 && [
+                    Math.ceil(total / 100000) * 100000,
+                    Math.ceil(total / 100000) * 100000 + 100000,
+                    Math.ceil(total / 100000) * 100000 + 200000,
+                  ].map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setCashReceived(v.toString())}
+                      className="rounded-lg border border-gray-200 px-2.5 py-1 text-xs font-medium text-gray-600 hover:bg-gray-50"
+                    >
+                      {formatCurrency(v)}
+                    </button>
+                  ))}
                 </div>
               </div>
               {cash >= total && (
@@ -153,7 +233,7 @@ export default function SaleModal({ items, discount, onConfirm, onClose }: SaleM
             <input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Cliente, observaciones…"
+              placeholder="Observaciones, referencia de pedido…"
               className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
             />
           </div>

@@ -183,10 +183,19 @@ export default function SuppliersPage() {
 
         {tab === 'suppliers' && (
           <>
-            <div className="relative max-w-sm">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <div className="relative w-full max-w-sm">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar proveedor…"
-                className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
+                className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-400 hover:bg-gray-600 transition-colors"
+                  title="Limpiar búsqueda"
+                >
+                  <X className="h-3.5 w-3.5 text-white" />
+                </button>
+              )}
             </div>
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
               {loading ? (
@@ -199,31 +208,51 @@ export default function SuppliersPage() {
                   <p className="text-sm">No hay proveedores registrados</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 border-b border-gray-200">
-                      <tr>{['Nombre', 'NIT', 'Contacto', 'Teléfono', 'Ciudad', ''].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
-                      ))}</tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {suppliers.map(s => (
-                        <tr key={s.id} className="hover:bg-gray-50">
-                          <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
-                          <td className="px-4 py-3 text-gray-600">{s.nit ?? '—'}</td>
-                          <td className="px-4 py-3 text-gray-600">{s.contact_name ?? '—'}</td>
-                          <td className="px-4 py-3 text-gray-600">{s.phone ?? '—'}</td>
-                          <td className="px-4 py-3 text-gray-600">{s.city ?? '—'}</td>
-                          <td className="px-4 py-3">
-                            <button onClick={() => openEditSupplier(s)} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-sky-600">
-                              <Edit2 className="h-4 w-4" />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                <>
+                  {/* Vista móvil: tarjetas */}
+                  <div className="divide-y divide-gray-100 sm:hidden">
+                    {suppliers.map(s => (
+                      <div key={s.id} className="flex items-start justify-between gap-3 px-4 py-4">
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 truncate">{s.name}</p>
+                          {s.nit && <p className="text-sm text-gray-500">NIT: {s.nit}</p>}
+                          {s.contact_name && <p className="text-sm text-gray-500">{s.contact_name}</p>}
+                          {s.phone && <p className="text-sm text-gray-500">{s.phone}</p>}
+                          {s.city && <p className="text-sm text-gray-400">{s.city}</p>}
+                        </div>
+                        <button onClick={() => openEditSupplier(s)} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-sky-600 shrink-0">
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Vista escritorio: tabla */}
+                  <div className="hidden sm:block overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-50 border-b border-gray-200">
+                        <tr>{['Nombre', 'NIT', 'Contacto', 'Teléfono', 'Ciudad', ''].map(h => (
+                          <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">{h}</th>
+                        ))}</tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {suppliers.map(s => (
+                          <tr key={s.id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 font-medium text-gray-900">{s.name}</td>
+                            <td className="px-4 py-3 text-gray-600">{s.nit ?? '—'}</td>
+                            <td className="px-4 py-3 text-gray-600">{s.contact_name ?? '—'}</td>
+                            <td className="px-4 py-3 text-gray-600">{s.phone ?? '—'}</td>
+                            <td className="px-4 py-3 text-gray-600">{s.city ?? '—'}</td>
+                            <td className="px-4 py-3">
+                              <button onClick={() => openEditSupplier(s)} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-sky-600">
+                                <Edit2 className="h-4 w-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
               )}
             </div>
           </>

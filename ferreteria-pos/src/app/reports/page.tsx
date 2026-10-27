@@ -192,35 +192,35 @@ export default function ReportsPage() {
 
   return (
     <AppShell>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
 
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Reportes</h2>
             <p className="text-sm text-gray-500">Análisis de ventas e inventario</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Selector de período */}
             <div className="flex rounded-lg border border-gray-200 overflow-hidden text-sm">
               {(Object.keys(PERIOD_LABELS) as Period[]).map(p => (
                 <button
                   key={p}
                   onClick={() => setPeriod(p)}
-                  className={`px-3 py-2 font-medium transition-colors ${
+                  className={`px-2.5 py-2 font-medium transition-colors ${
                     period === p ? 'bg-sky-500 text-white' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
-                  {p === 'week' ? '7 días' : p === 'month' ? 'Mes' : p === 'quarter' ? '3 meses' : 'Año'}
+                  {p === 'week' ? '7d' : p === 'month' ? 'Mes' : p === 'quarter' ? '3m' : 'Año'}
                 </button>
               ))}
             </div>
             <button
               onClick={exportExcel}
-              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               <Download className="h-4 w-4 text-green-600" />
-              Exportar Excel
+              <span className="hidden sm:inline">Exportar </span>Excel
             </button>
           </div>
         </div>
@@ -232,7 +232,7 @@ export default function ReportsPage() {
         ) : (
           <>
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               {[
                 { label: 'Ingresos totales', value: formatCurrency(summary.revenue), icon: TrendingUp, color: 'text-sky-500', bg: 'bg-sky-50' },
                 { label: 'Total ventas', value: summary.sales.toString(), icon: ShoppingBag, color: 'text-blue-500', bg: 'bg-blue-50' },

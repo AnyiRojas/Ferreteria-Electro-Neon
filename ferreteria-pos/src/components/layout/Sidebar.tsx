@@ -18,6 +18,7 @@ import {
   Settings,
   RotateCcw,
   FileText,
+  BookOpen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMode } from '@/lib/ModeContext';
@@ -33,6 +34,7 @@ const ADMIN_NAV = [
   { href: '/quotes',         label: 'Cotizaciones',    icon: FileText,        group: 'Extras' },
   { href: '/returns',        label: 'Devoluciones',    icon: RotateCcw,       group: 'Extras' },
   { href: '/reports',        label: 'Reportes',        icon: BarChart3,       group: 'Admin' },
+  { href: '/accounting',     label: 'Contabilidad',    icon: BookOpen,        group: 'Admin' },
   { href: '/settings',       label: 'Configuración',   icon: Settings,        group: 'Admin' },
 ];
 

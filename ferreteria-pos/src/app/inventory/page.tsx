@@ -116,7 +116,7 @@ export default function InventoryPage() {
       description: formData.description.trim() || null,
       price:       Number(formData.price),
       cost:        Number(formData.cost),
-      stock:       editingProduct ? editingProduct.stock : Number(formData.stock),
+      stock:       Number(formData.stock),   // editable tanto en creación como edición
       min_stock:   Number(formData.min_stock) || 5,
       category_id: formData.category_id || null,
       barcode:     formData.barcode.trim() || null,
@@ -213,13 +213,11 @@ export default function InventoryPage() {
 
   return (
     <AppShell>
-      <div className="space-y-5">
+      <div className="space-y-4">
         {/* Header bar */}
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">
-              Inventario
-            </h2>
+            <h2 className="text-xl font-bold text-gray-900">Inventario</h2>
             <p className="text-sm text-gray-500">
               {products.length} productos
               {lowStockCount > 0 && (
@@ -229,103 +227,110 @@ export default function InventoryPage() {
               )}
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <button
               onClick={() => setShowExcelImport(true)}
-              className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition-transform"
+              className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition-transform"
             >
               <FileSpreadsheet className="h-4 w-4 text-green-600" />
-              Importar Excel
+              <span className="hidden sm:inline">Importar Excel</span>
+              <span className="sm:hidden">Excel</span>
             </button>
             <button
               onClick={openAdd}
-              className="flex items-center gap-2 rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-white hover:bg-sky-600 active:scale-95 transition-transform"
+              className="flex items-center gap-2 rounded-lg bg-sky-500 px-3 py-2 text-sm font-medium text-white hover:bg-sky-600 active:scale-95 transition-transform"
             >
               <Plus className="h-4 w-4" />
-              Nuevo producto
+              <span className="hidden sm:inline">Nuevo producto</span>
+              <span className="sm:hidden">Nuevo</span>
             </button>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
-          {/* Search */}
-          <div className="relative flex-1 min-w-48">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar por nombre, código…"
-              className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-            />
-            {search && (
-              <button
-                onClick={() => setSearch('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+        {/* Filters — primera fila: búsqueda + categoría */}
+        <div className="space-y-2 rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Search — ocupa todo el ancho en móvil */}
+            <div className="relative flex-1 min-w-0 w-full sm:w-auto">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por nombre, código…"
+                className="w-full rounded-lg border border-gray-200 py-2 pl-9 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full bg-gray-400 hover:bg-gray-600 transition-colors"
+                >
+                  <X className="h-3 w-3 text-white" />
+                </button>
+              )}
+            </div>
+
+            {/* Category filter */}
+            <div className="flex items-center gap-2 flex-1 min-w-36">
+              <Filter className="h-4 w-4 text-gray-400 shrink-0" />
+              <select
+                value={categoryFilter}
+                onChange={(e) => setCategoryFilter(e.target.value)}
+                className="flex-1 rounded-lg border border-gray-200 py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
               >
-                <X className="h-4 w-4" />
+                <option value="">Todas las categorías</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Segunda fila: toggles y vista */}
+          <div className="flex items-center gap-3 flex-wrap">
+            {/* Active toggle */}
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={activeOnly}
+                onChange={(e) => setActiveOnly(e.target.checked)}
+                className="rounded border-gray-300 accent-sky-500"
+              />
+              Solo activos
+            </label>
+
+            {/* Refresh */}
+            <button
+              onClick={loadProducts}
+              className="rounded-lg border border-gray-200 p-2 text-gray-500 hover:bg-gray-50"
+              title="Recargar"
+            >
+              <RefreshCw className="h-4 w-4" />
+            </button>
+
+            {/* Spacer */}
+            <div className="flex-1" />
+
+            {/* View mode */}
+            <div className="flex rounded-lg border border-gray-200 overflow-hidden">
+              <button
+                onClick={() => setView('table')}
+                className={`p-2 transition-colors ${
+                  view === 'table' ? 'bg-sky-500 text-white' : 'text-gray-400 hover:bg-gray-50'
+                }`}
+                title="Vista tabla"
+              >
+                <LayoutList className="h-4 w-4" />
               </button>
-            )}
-          </div>
-
-          {/* Category filter */}
-          <div className="flex items-center gap-2">
-            <Filter className="h-4 w-4 text-gray-400" />
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="rounded-lg border border-gray-200 py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
-            >
-              <option value="">Todas las categorías</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Active toggle */}
-          <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
-            <input
-              type="checkbox"
-              checked={activeOnly}
-              onChange={(e) => setActiveOnly(e.target.checked)}
-              className="rounded border-gray-300 accent-sky-500"
-            />
-            Solo activos
-          </label>
-
-          {/* Refresh */}
-          <button
-            onClick={loadProducts}
-            className="rounded-lg border border-gray-200 p-2 text-gray-500 hover:bg-gray-50"
-          >
-            <RefreshCw className="h-4 w-4" />
-          </button>
-
-          {/* View mode */}
-          <div className="flex rounded-lg border border-gray-200 overflow-hidden">
-            <button
-              onClick={() => setView('table')}
-              className={`p-2 transition-colors ${
-                view === 'table'
-                  ? 'bg-sky-500 text-white'
-                  : 'text-gray-400 hover:bg-gray-50'
-              }`}
-            >
-              <LayoutList className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setView('grid')}
-              className={`p-2 transition-colors ${
-                view === 'grid'
-                  ? 'bg-sky-500 text-white'
-                  : 'text-gray-400 hover:bg-gray-50'
-              }`}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
+              <button
+                onClick={() => setView('grid')}
+                className={`p-2 transition-colors ${
+                  view === 'grid' ? 'bg-sky-500 text-white' : 'text-gray-400 hover:bg-gray-50'
+                }`}
+                title="Vista cuadrícula"
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
           </div>
         </div>
 

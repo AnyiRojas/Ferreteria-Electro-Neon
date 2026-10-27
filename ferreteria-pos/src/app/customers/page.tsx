@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
-import { Plus, Search, Users, X, Edit2, Loader2, History } from 'lucide-react';
+import { Plus, Search, Users, X, Edit2, Loader2, History, Phone, MapPin } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
@@ -99,14 +99,23 @@ export default function CustomersPage() {
         </div>
 
         {/* Buscador */}
-        <div className="relative max-w-sm">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 pointer-events-none" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             placeholder="Buscar por nombre, documento, teléfono…"
-            className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+            className="w-full rounded-lg border border-gray-300 py-2 pl-9 pr-9 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
           />
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full bg-gray-400 hover:bg-gray-600 transition-colors"
+              title="Limpiar búsqueda"
+            >
+              <X className="h-3.5 w-3.5 text-white" />
+            </button>
+          )}
         </div>
 
         {/* Tabla */}
@@ -121,7 +130,40 @@ export default function CustomersPage() {
               <p className="text-sm">{search ? 'Sin resultados' : 'No hay clientes registrados'}</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+            {/* Vista móvil: tarjetas */}
+            <div className="divide-y divide-gray-100 sm:hidden">
+              {customers.map(c => (
+                <div key={c.id} className="px-4 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">{c.name}</p>
+                      <p className="text-sm text-gray-500">{c.document_type} {c.document_number}</p>
+                      {c.phone && (
+                        <p className="flex items-center gap-1 text-sm text-gray-500 mt-0.5">
+                          <Phone className="h-3.5 w-3.5" />{c.phone}
+                        </p>
+                      )}
+                      {c.city && (
+                        <p className="flex items-center gap-1 text-sm text-gray-500">
+                          <MapPin className="h-3.5 w-3.5" />{c.city}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-col gap-1 shrink-0">
+                      <button onClick={() => openHistory(c)} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-blue-600" title="Historial">
+                        <History className="h-4 w-4" />
+                      </button>
+                      <button onClick={() => openEdit(c)} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100 hover:text-sky-600" title="Editar">
+                        <Edit2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Vista escritorio: tabla */}
+            <div className="hidden sm:block overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -152,6 +194,7 @@ export default function CustomersPage() {
                 </tbody>
               </table>
             </div>
+            </>
           )}
         </div>
       </div>

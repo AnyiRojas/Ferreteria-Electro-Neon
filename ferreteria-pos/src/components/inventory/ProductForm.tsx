@@ -192,12 +192,35 @@ export default function ProductForm({
 
           {/* Stock / Min stock */}
           <div className="grid grid-cols-2 gap-4">
-            {field('Stock actual', 'stock', {
-              type: 'number',
-              min: '0',
-              placeholder: '0',
-              disabled: !!product,
-            })}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Stock actual
+                {product && (
+                  <span className="ml-1.5 text-xs font-normal text-amber-600">
+                    (editable — ten cuidado)
+                  </span>
+                )}
+              </label>
+              <input
+                type="number"
+                min="0"
+                placeholder="0"
+                value={form.stock}
+                onChange={set('stock')}
+                className={cn(
+                  'mt-1 block w-full rounded-lg border px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-400',
+                  errors.stock ? 'border-red-400' : 'border-gray-300'
+                )}
+              />
+              {errors.stock && (
+                <p className="mt-1 text-xs text-red-500">{errors.stock}</p>
+              )}
+              {product && (
+                <p className="mt-1 text-xs text-gray-400">
+                  Usa "Ajustar stock" para entradas/salidas con historial
+                </p>
+              )}
+            </div>
             {field('Stock mínimo', 'min_stock', {
               type: 'number',
               min: '0',

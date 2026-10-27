@@ -8,8 +8,9 @@ import POSCart from '@/components/sales/POSCart';
 import SaleModal from '@/components/sales/SaleModal';
 import InvoicePrint from '@/components/sales/InvoicePrint';
 import { supabase } from '@/lib/supabase';
+import { useCart } from '@/lib/CartContext';
 import { formatCurrency, formatDateTime, paymentMethodLabel } from '@/lib/utils';
-import type { CartItem, Category, CheckoutData, Product, Sale } from '@/types';
+import type { Category, CheckoutData, Product, Sale } from '@/types';
 
 export default function SalesPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,21 +19,20 @@ export default function SalesPage() {
   const [categoryFilter, setCategoryFilter] = useState('');
   const [loading, setLoading] = useState(true);
 
-  const [cart, setCart] = useState<CartItem[]>([]);
-  const [discount, setDiscount] = useState(0);
+  // Usar el carrito global persistente
+  const { cart, discount, addToCart, updateQty, removeFromCart, setDiscount, clearCart } = useCart();
+
   const [showCheckout, setShowCheckout] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  // Factura post-venta
   const [invoiceData, setInvoiceData] = useState<{
-    items: CartItem[];
+    items: typeof cart;
     checkoutData: CheckoutData;
     saleId: string;
   } | null>(null);
 
   const [recentSales, setRecentSales] = useState<Sale[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
-
   const [toast, setToast] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -40,7 +40,7 @@ export default function SalesPage() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // ── Load products ─────────────────────────────────────────────────────────
+  // ── Load products ──────────────────────────────────────────────────────────
   const loadProducts = useCallback(async () => {
     setLoading(true);
     let query = supabase
@@ -51,9 +51,7 @@ export default function SalesPage() {
 
     if (categoryFilter) query = query.eq('category_id', categoryFilter);
     if (search)
-      query = query.or(
-        `name.ilike.%${search}%,barcode.ilike.%${search}%`
-      );
+      query = query.or(`name.ilike.%${search}%,barcode.ilike.%${search}%`);
 
     const { data } = await query;
     setProducts((data ?? []) as Product[]);
@@ -61,69 +59,18 @@ export default function SalesPage() {
   }, [search, categoryFilter]);
 
   const loadCategories = useCallback(async () => {
-    const { data } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name');
+    const { data } = await supabase.from('categories').select('*').order('name');
     setCategories(data ?? []);
   }, []);
 
-  useEffect(() => {
-    loadCategories();
-  }, [loadCategories]);
+  useEffect(() => { loadCategories(); }, [loadCategories]);
 
   useEffect(() => {
     const t = setTimeout(loadProducts, 250);
     return () => clearTimeout(t);
   }, [loadProducts]);
 
-  // ── Cart ops ──────────────────────────────────────────────────────────────
-  const addToCart = (product: Product) => {
-    setCart((prev) => {
-      const existing = prev.find((i) => i.product.id === product.id);
-      if (existing) {
-        if (existing.quantity >= product.stock) return prev;
-        return prev.map((i) =>
-          i.product.id === product.id
-            ? {
-                ...i,
-                quantity: i.quantity + 1,
-                subtotal: (i.quantity + 1) * i.unit_price,
-              }
-            : i
-        );
-      }
-      return [
-        ...prev,
-        {
-          product,
-          quantity: 1,
-          unit_price: product.price,
-          subtotal: product.price,
-        },
-      ];
-    });
-  };
-
-  const updateQty = (productId: string, qty: number) => {
-    if (qty <= 0) {
-      removeFromCart(productId);
-      return;
-    }
-    setCart((prev) =>
-      prev.map((i) =>
-        i.product.id === productId
-          ? { ...i, quantity: qty, subtotal: qty * i.unit_price }
-          : i
-      )
-    );
-  };
-
-  const removeFromCart = (productId: string) => {
-    setCart((prev) => prev.filter((i) => i.product.id !== productId));
-  };
-
-  // ── Checkout ──────────────────────────────────────────────────────────────
+  // ── Checkout ───────────────────────────────────────────────────────────────
   const handleCheckout = async (data: CheckoutData) => {
     const subtotal = cart.reduce((s, i) => s + i.subtotal, 0);
     const discountAmount = (subtotal * data.discount) / 100;
@@ -136,7 +83,6 @@ export default function SalesPage() {
       subtotal: i.subtotal,
     }));
 
-    // Recuperar el turno de caja activo (si existe)
     const registerId = sessionStorage.getItem('active_register_id') ?? null;
 
     const { data: saleId, error } = await supabase.rpc('process_sale', {
@@ -155,24 +101,13 @@ export default function SalesPage() {
       return;
     }
 
-    // Guarda snapshot para imprimir la factura
-    setInvoiceData({
-      items: [...cart],
-      checkoutData: data,
-      saleId: saleId as string,
-    });
-
+    setInvoiceData({ items: [...cart], checkoutData: data, saleId: saleId as string });
     setShowCheckout(false);
-    setCart([]);
-    setDiscount(0);
-    loadProducts(); // refresh stock
+    clearCart(); // limpia carrito global + sessionStorage
+    loadProducts();
   };
 
-  const closeCheckout = () => {
-    setShowCheckout(false);
-  };
-
-  // ── History ───────────────────────────────────────────────────────────────
+  // ── History ────────────────────────────────────────────────────────────────
   const loadHistory = useCallback(async () => {
     setLoadingHistory(true);
     const { data } = await supabase
@@ -184,10 +119,7 @@ export default function SalesPage() {
     setLoadingHistory(false);
   }, []);
 
-  const openHistory = () => {
-    setShowHistory(true);
-    loadHistory();
-  };
+  const openHistory = () => { setShowHistory(true); loadHistory(); };
 
   return (
     <AppShell>
@@ -219,7 +151,6 @@ export default function SalesPage() {
                 {c.name}
               </button>
             ))}
-            {/* History button */}
             <button
               onClick={openHistory}
               className="ml-auto shrink-0 flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 hover:border-sky-300"
@@ -260,7 +191,7 @@ export default function SalesPage() {
           items={cart}
           discount={discount}
           onConfirm={handleCheckout}
-          onClose={closeCheckout}
+          onClose={() => setShowCheckout(false)}
         />
       )}
 
@@ -279,13 +210,8 @@ export default function SalesPage() {
         <div className="fixed inset-0 z-50 flex justify-end bg-black/50">
           <div className="flex h-full w-full max-w-lg flex-col bg-white shadow-xl">
             <div className="flex items-center justify-between border-b border-gray-200 px-6 py-4">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Historial de ventas
-              </h3>
-              <button
-                onClick={() => setShowHistory(false)}
-                className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100"
-              >
+              <h3 className="text-lg font-semibold text-gray-900">Historial de ventas</h3>
+              <button onClick={() => setShowHistory(false)} className="rounded-md p-1.5 text-gray-400 hover:bg-gray-100">
                 <X className="h-5 w-5" />
               </button>
             </div>
@@ -295,32 +221,24 @@ export default function SalesPage() {
                   <div className="h-8 w-8 animate-spin rounded-full border-4 border-sky-500 border-t-transparent" />
                 </div>
               ) : recentSales.length === 0 ? (
-                <p className="py-16 text-center text-sm text-gray-400">
-                  No hay ventas registradas
-                </p>
+                <p className="py-16 text-center text-sm text-gray-400">No hay ventas registradas</p>
               ) : (
                 recentSales.map((sale) => (
                   <div key={sale.id} className="px-6 py-4">
                     <div className="flex items-start justify-between">
                       <div>
-                        <p className="text-sm font-semibold text-gray-800">
-                          {formatCurrency(sale.total)}
-                        </p>
+                        <p className="text-sm font-semibold text-gray-800">{formatCurrency(sale.total)}</p>
                         <p className="text-xs text-gray-400">
-                          {paymentMethodLabel(sale.payment_method)} ·{' '}
-                          {formatDateTime(sale.created_at)}
+                          {paymentMethodLabel(sale.payment_method)} · {formatDateTime(sale.created_at)}
                         </p>
                       </div>
-                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">
-                        Completada
-                      </span>
+                      <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-700">Completada</span>
                     </div>
                     {sale.sale_items && sale.sale_items.length > 0 && (
                       <ul className="mt-2 space-y-0.5">
                         {sale.sale_items.map((item, idx) => (
                           <li key={idx} className="text-xs text-gray-500">
-                            {(item.product as unknown as { name: string })?.name ?? '—'} ×{item.quantity} —{' '}
-                            {formatCurrency(item.unit_price)}
+                            {(item.product as unknown as { name: string })?.name ?? '—'} ×{item.quantity} — {formatCurrency(item.unit_price)}
                           </li>
                         ))}
                       </ul>

@@ -107,6 +107,9 @@ export interface CheckoutData {
   cash_received: number;
   discount: number;
   notes: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_id_number: string; // CC o NIT
 }
 
 // ─── Dashboard / Analytics Types ─────────────────────────────────────────────
