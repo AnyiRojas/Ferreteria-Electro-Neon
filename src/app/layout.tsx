@@ -8,8 +8,13 @@ import FloatingCart from '@/components/sales/FloatingCart';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Ferretería POS',
-  description: 'Sistema de punto de venta para ferretería',
+  title: 'Electro Neon Ferrelectricos',
+  description: 'Sistema de punto de venta — Electro Neon Ferrelectricos',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

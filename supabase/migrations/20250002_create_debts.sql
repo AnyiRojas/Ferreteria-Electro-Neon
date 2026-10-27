@@ -31,25 +31,25 @@ create index if not exists debts_status_idx        on public.debts (status);
 create index if not exists debt_payments_debt_idx  on public.debt_payments (debt_id);
 create index if not exists debt_payments_date_idx  on public.debt_payments (date desc);
 
--- ─── RLS ─────────────────────────────────────────────────────────────────────
+-- ─── RLS: la app usa anon key (sin login), se permite acceso público ──────────
 
 alter table public.debts enable row level security;
 alter table public.debt_payments enable row level security;
 
--- debts
-create policy "Auth puede leer deudas"
-  on public.debts for select using (auth.role() = 'authenticated');
-create policy "Auth puede insertar deudas"
-  on public.debts for insert with check (auth.role() = 'authenticated');
-create policy "Auth puede actualizar deudas"
-  on public.debts for update using (auth.role() = 'authenticated');
-create policy "Auth puede eliminar deudas"
-  on public.debts for delete using (auth.role() = 'authenticated');
+drop policy if exists "Auth puede leer deudas" on public.debts;
+drop policy if exists "Auth puede insertar deudas" on public.debts;
+drop policy if exists "Auth puede actualizar deudas" on public.debts;
+drop policy if exists "Auth puede eliminar deudas" on public.debts;
+drop policy if exists "Auth puede leer abonos" on public.debt_payments;
+drop policy if exists "Auth puede insertar abonos" on public.debt_payments;
+drop policy if exists "Auth puede eliminar abonos" on public.debt_payments;
 
--- debt_payments
-create policy "Auth puede leer abonos"
-  on public.debt_payments for select using (auth.role() = 'authenticated');
-create policy "Auth puede insertar abonos"
-  on public.debt_payments for insert with check (auth.role() = 'authenticated');
-create policy "Auth puede eliminar abonos"
-  on public.debt_payments for delete using (auth.role() = 'authenticated');
+create policy "Acceso publico a deudas"
+  on public.debts for all
+  using (true)
+  with check (true);
+
+create policy "Acceso publico a abonos"
+  on public.debt_payments for all
+  using (true)
+  with check (true);

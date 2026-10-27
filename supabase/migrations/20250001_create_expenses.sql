@@ -19,21 +19,15 @@ create table if not exists public.expenses (
 -- Índice por fecha para consultas por período
 create index if not exists expenses_date_idx on public.expenses (date desc);
 
--- RLS: solo usuarios autenticados pueden leer/escribir
+-- RLS: la app usa anon key (sin login), se permite acceso público
 alter table public.expenses enable row level security;
 
-create policy "Autenticados pueden leer gastos"
-  on public.expenses for select
-  using (auth.role() = 'authenticated');
+drop policy if exists "Autenticados pueden leer gastos" on public.expenses;
+drop policy if exists "Autenticados pueden insertar gastos" on public.expenses;
+drop policy if exists "Autenticados pueden eliminar gastos" on public.expenses;
+drop policy if exists "Autenticados pueden actualizar gastos" on public.expenses;
 
-create policy "Autenticados pueden insertar gastos"
-  on public.expenses for insert
-  with check (auth.role() = 'authenticated');
-
-create policy "Autenticados pueden eliminar gastos"
-  on public.expenses for delete
-  using (auth.role() = 'authenticated');
-
-create policy "Autenticados pueden actualizar gastos"
-  on public.expenses for update
-  using (auth.role() = 'authenticated');
+create policy "Acceso publico a gastos"
+  on public.expenses for all
+  using (true)
+  with check (true);
