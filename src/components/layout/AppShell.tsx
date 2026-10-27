@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useMode } from '@/lib/ModeContext';
 
 const TITLES: Record<string, string> = {
   '/dashboard':   'Dashboard',
@@ -22,7 +23,16 @@ const TITLES: Record<string, string> = {
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
   const mainRef = useRef<HTMLElement>(null);
+  const { mode } = useMode();
+
+  // Protección: si no hay modo activo, redirigir al inicio (pedir PIN)
+  useEffect(() => {
+    if (mode === null) {
+      router.replace('/');
+    }
+  }, [mode, router]);
 
   const title =
     Object.entries(TITLES).find(([key]) => pathname.startsWith(key))?.[1] ??
