@@ -51,7 +51,7 @@ export default function DashboardPage() {
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingChart, setLoadingChart] = useState(true);
 
-  // ── KPI stats — 2 consultas en vez de 5 ───────────────────────────────────
+  // ── KPI stats ─────────────────────────────────────────────────────────────
   const loadStats = useCallback(async () => {
     setLoadingStats(true);
 
@@ -60,30 +60,42 @@ export default function DashboardPage() {
     const yesterdayStart = new Date(todayStart);
     yesterdayStart.setDate(yesterdayStart.getDate() - 1);
 
-    // Consulta 1: ventas de los últimos 2 días + recientes en una sola llamada
-    // Consulta 2: todos los productos activos (stock + count) en una sola llamada
-    const [{ data: salesData }, { data: productsData }] = await Promise.all([
+    // 3 consultas separadas para evitar que el límite corte datos importantes:
+    // 1. Ventas de HOY (sin límite — puede haber muchas)
+    // 2. Ventas de AYER (para calcular cambio %)
+    // 3. Productos activos con paginación real
+    const [{ data: todayData }, { data: yesterdayData }, { data: productsData }] = await Promise.all([
       supabase
         .from('sales')
         .select('id, total, payment_method, created_at, sale_items(*, product:products(name))')
+        .gte('created_at', todayStart.toISOString())
+        .order('created_at', { ascending: false }),
+      supabase
+        .from('sales')
+        .select('id, total, created_at')
         .gte('created_at', yesterdayStart.toISOString())
-        .order('created_at', { ascending: false })
-        .limit(50),
+        .lt('created_at', todayStart.toISOString()),
       supabase
         .from('products')
         .select('id, name, stock, min_stock, unit, active')
         .eq('active', true)
+        .gt('min_stock', 0)           // solo productos que tienen mínimo configurado
         .order('stock', { ascending: true })
-        .limit(200),
+        .limit(500),
     ]);
 
-    // Calcular KPIs en cliente — sin round-trips extra
-    const todaySales     = (salesData ?? []).filter(s => s.created_at >= todayStart.toISOString());
-    const yesterdaySales = (salesData ?? []).filter(s => s.created_at < todayStart.toISOString());
+    const todaySales     = (todayData ?? []) as Sale[];
+    const yesterdaySales = (yesterdayData ?? []);
     const todayRevenue     = todaySales.reduce((s, r) => s + Number(r.total), 0);
     const yesterdayRevenue = yesterdaySales.reduce((s, r) => s + Number(r.total), 0);
     const revenueChange    = yesterdayRevenue === 0 ? 0
       : ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100;
+
+    // Contar productos activos (consulta separada sin filtro min_stock)
+    const { count: totalProductsCount } = await supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('active', true);
 
     const allProducts  = (productsData ?? []) as Product[];
     const lowStockList = allProducts.filter(p => p.stock <= p.min_stock);
@@ -91,14 +103,14 @@ export default function DashboardPage() {
     setStats({
       todayRevenue,
       todaySalesCount: todaySales.length,
-      totalProducts:   allProducts.length,
+      totalProducts:   totalProductsCount ?? 0,
       lowStockCount:   lowStockList.length,
       revenueChange,
       salesCountChange: 0,
     });
 
     setLowStock(lowStockList.slice(0, 10));
-    setRecentSales((salesData ?? []).slice(0, 5) as Sale[]);
+    setRecentSales(todaySales.slice(0, 5));
     setLoadingStats(false);
   }, []);
 
