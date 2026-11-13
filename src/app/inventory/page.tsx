@@ -1,6 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import * as XLSX from 'xlsx';
 import {
   Plus,
   Search,
@@ -14,6 +15,7 @@ import {
   ArrowUpCircle,
   ArrowDownCircle,
   FileSpreadsheet,
+  Download,
 } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
 import ProductCard from '@/components/inventory/ProductCard';
@@ -35,6 +37,8 @@ export default function InventoryPage() {
   // Filters
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [supplierFilter, setSupplierFilter] = useState('');
+  const [lowStockOnly, setLowStockOnly] = useState(false);
   const [activeOnly, setActiveOnly] = useState(true);
   const [sortBy, setSortBy] = useState('name');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -83,6 +87,7 @@ export default function InventoryPage() {
 
     if (activeOnly) query = query.eq('active', true);
     if (categoryFilter) query = query.eq('category_id', categoryFilter);
+    if (supplierFilter) query = query.ilike('supplier', `%${supplierFilter}%`);
     if (search)
       query = query.or(
         `name.ilike.%${search}%,barcode.ilike.%${search}%,description.ilike.%${search}%`
@@ -92,7 +97,7 @@ export default function InventoryPage() {
     if (error) showToast('Error cargando productos', 'error');
     else setProducts((data ?? []) as Product[]);
     setLoading(false);
-  }, [search, categoryFilter, activeOnly, sortBy, sortOrder]);
+  }, [search, categoryFilter, supplierFilter, activeOnly, sortBy, sortOrder]);
 
   useEffect(() => {
     loadCategories();
@@ -102,6 +107,39 @@ export default function InventoryPage() {
     const t = setTimeout(loadProducts, 300);
     return () => clearTimeout(t);
   }, [loadProducts]);
+
+  // ── Suppliers list (derived from loaded products) ─────────────────────────
+  const supplierList = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => { if (p.supplier) set.add(p.supplier); });
+    return Array.from(set).sort();
+  }, [products]);
+
+  // ── Filtered products (low-stock filter applied client-side) ──────────────
+  const filteredProducts = useMemo(
+    () => lowStockOnly ? products.filter((p) => p.stock <= p.min_stock) : products,
+    [products, lowStockOnly]
+  );
+
+  // ── Export Excel ──────────────────────────────────────────────────────────
+  const handleExportExcel = () => {
+    const rows = filteredProducts.map((p) => ({
+      Nombre: p.name,
+      Código: p.barcode ?? '',
+      Categoría: p.category?.name ?? '',
+      Proveedor: p.supplier ?? '',
+      'P. Venta': p.price,
+      'P. Compra': p.cost,
+      Stock: p.stock,
+      'Stock mínimo': p.min_stock,
+      Unidad: p.unit,
+      Estado: p.stock <= p.min_stock ? 'Stock bajo' : 'En stock',
+    }));
+    const ws = XLSX.utils.json_to_sheet(rows);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+    XLSX.writeFile(wb, `inventario_${new Date().toISOString().slice(0, 10)}.xlsx`);
+  };
 
   // ── Sort ──────────────────────────────────────────────────────────────────
   const handleSort = (column: string) => {
@@ -211,6 +249,8 @@ export default function InventoryPage() {
     (p) => p.stock <= p.min_stock && p.active
   ).length;
 
+  const hasActiveFilters = !!(search || categoryFilter || supplierFilter || lowStockOnly || !activeOnly);
+
   return (
     <AppShell>
       <div className="space-y-4">
@@ -228,6 +268,15 @@ export default function InventoryPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
+            <button
+              onClick={handleExportExcel}
+              title="Exportar lista actual a Excel"
+              className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition-transform"
+            >
+              <Download className="h-4 w-4 text-emerald-600" />
+              <span className="hidden sm:inline">Exportar Excel</span>
+              <span className="sm:hidden">Exportar</span>
+            </button>
             <button
               onClick={() => setShowExcelImport(true)}
               className="flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 active:scale-95 transition-transform"
@@ -283,6 +332,20 @@ export default function InventoryPage() {
                 ))}
               </select>
             </div>
+
+            {/* Supplier filter */}
+            <div className="flex items-center gap-2 flex-1 min-w-36">
+              <select
+                value={supplierFilter}
+                onChange={(e) => setSupplierFilter(e.target.value)}
+                className="flex-1 rounded-lg border border-gray-200 py-2 pl-3 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400"
+              >
+                <option value="">Todos los proveedores</option>
+                {supplierList.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           {/* Segunda fila: toggles y vista */}
@@ -297,6 +360,42 @@ export default function InventoryPage() {
               />
               Solo activos
             </label>
+
+            {/* Low stock toggle */}
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-gray-600">
+              <input
+                type="checkbox"
+                checked={lowStockOnly}
+                onChange={(e) => setLowStockOnly(e.target.checked)}
+                className="rounded border-gray-300 accent-amber-500"
+              />
+              <span className={lowStockOnly ? 'text-amber-600 font-medium' : ''}>
+                Solo stock bajo
+                {lowStockCount > 0 && (
+                  <span className="ml-1 rounded-full bg-amber-100 px-1.5 py-0.5 text-xs font-semibold text-amber-700">
+                    {lowStockCount}
+                  </span>
+                )}
+              </span>
+            </label>
+
+            {/* Reset filters */}
+            {hasActiveFilters && (
+              <button
+                onClick={() => {
+                  setSearch('');
+                  setCategoryFilter('');
+                  setSupplierFilter('');
+                  setLowStockOnly(false);
+                  setActiveOnly(true);
+                }}
+                className="flex items-center gap-1 rounded-lg border border-gray-200 px-2 py-1 text-xs text-gray-500 hover:bg-gray-50"
+                title="Limpiar filtros"
+              >
+                <X className="h-3 w-3" />
+                Limpiar filtros
+              </button>
+            )}
 
             {/* Refresh */}
             <button
@@ -334,10 +433,19 @@ export default function InventoryPage() {
           </div>
         </div>
 
+        {/* Resumen de filtros activos */}
+        {(supplierFilter || lowStockOnly) && (
+          <p className="text-xs text-gray-500">
+            Mostrando <strong>{filteredProducts.length}</strong> productos
+            {supplierFilter && <> · proveedor: <strong>{supplierFilter}</strong></>}
+            {lowStockOnly && <> · <span className="text-amber-600 font-medium">solo stock bajo</span></>}
+          </p>
+        )}
+
         {/* Product list */}
         {view === 'table' ? (
           <ProductTable
-            products={products}
+            products={filteredProducts}
             sortBy={sortBy}
             sortOrder={sortOrder}
             onSort={handleSort}
@@ -352,12 +460,12 @@ export default function InventoryPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-            {products.length === 0 ? (
+            {filteredProducts.length === 0 ? (
               <p className="col-span-full py-16 text-center text-gray-400">
                 No se encontraron productos
               </p>
             ) : (
-              products.map((p) => (
+              filteredProducts.map((p) => (
                 <ProductCard
                   key={p.id}
                   product={p}
